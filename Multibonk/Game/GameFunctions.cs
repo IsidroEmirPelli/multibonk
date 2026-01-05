@@ -60,8 +60,25 @@ namespace Multibonk.Game
 
             GamePatchFlags.PlayersCache.Add(playerId, new SpawnedNetworkPlayer(player));
         }
-    }
 
+        public static void UpdateNetworkPlayerLevel(ushort playerId, int level)
+        {
+            var player = GetSpawnedPlayerFromId(playerId);
+            if (player != null)
+            {
+                player.UpdateLevel(level);
+            }
+        }
+
+        public static void UpdateNetworkPlayerXP(ushort playerId, int xp)
+        {
+            var player = GetSpawnedPlayerFromId(playerId);
+            if (player != null)
+            {
+                player.UpdateXP(xp);
+            }
+        }
+    }
 
     public class SpawnedNetworkPlayer
     {
@@ -69,6 +86,9 @@ namespace Multibonk.Game
         public float LastSeenTime { get; set; }
 
         public float LastTimeMoved { get; set; }
+
+        public int Level { get; private set; } = 1;
+        public int XP { get; private set; } = 0;
 
         public SpawnedNetworkPlayer(GameObject playerObject)
         {
@@ -98,6 +118,16 @@ namespace Multibonk.Game
         public void Rotate(Vector3 rotation)
         {
             PlayerObject.transform.rotation = Quaternion.Euler(rotation);
+        }
+
+        public void UpdateLevel(int level)
+        {
+            Level = level;
+        }
+
+        public void UpdateXP(int xp)
+        {
+            XP = xp;
         }
     }
 }

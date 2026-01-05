@@ -12,6 +12,8 @@
 
        PLAYER_MOVED_PACKET = 7,
        PLAYER_ROTATED_PACKET = 8,
+       PLAYER_LEVEL_UPDATED_PACKET = 9,
+       PLAYER_XP_UPDATED_PACKET = 10,
     }
 
     public enum ClientSentPacketId : byte
@@ -20,6 +22,8 @@
         CHARACTER_SELECTION = 1,
         GAME_LOADED_PACKET = 2,
         PLAYER_MOVE_PACKET = 3,
-        PLAYER_ROTATE_PACKET = 4
+        PLAYER_ROTATE_PACKET = 4,
+        PLAYER_LEVEL_PACKET = 5,
+        PLAYER_XP_PACKET = 6
     }
 }

@@ -20,6 +20,7 @@ namespace Multibonk.Game.Handlers.NetworkNotify
                 if (!LobbyPatchFlags.IsHosting)
                     return;
 
+                // Spawn all clients for the host
                 lobbyContext.GetPlayers()
                 .Where(player => player.Connection != null)
                 .ToList()
@@ -29,15 +30,21 @@ namespace Multibonk.Game.Handlers.NetworkNotify
                     var data = GamePatchFlags.CharacterData.Find(d => d.eCharacter == character);
                     GameFunctions.SpawnNetworkPlayer(player.UUID, character, MyPlayer.Instance.transform.position, MyPlayer.Instance.transform.rotation);
 
+                    // Send information about other players (including the host) to this client
                     lobbyContext.GetPlayers()
                         .Where(target => target != player)
                         .ToList()
                         .ForEach(target =>
                         {
-                            var character = Enum.Parse<ECharacter>(target.SelectedCharacter);
-                            var packet = new SendSpawnPlayerPacket(character, target.UUID, MyPlayer.Instance.transform.position, MyPlayer.Instance.transform.rotation);
+                            var targetCharacter = Enum.Parse<ECharacter>(target.SelectedCharacter);
+                            var packet = new SendSpawnPlayerPacket(targetCharacter, target.UUID, MyPlayer.Instance.transform.position, MyPlayer.Instance.transform.rotation);
                             player.Connection.EnqueuePacket(packet);
                         });
+
+                    // Also send the host's own character to this client
+                    var hostCharacter = Enum.Parse<ECharacter>(lobbyContext.GetMyself().SelectedCharacter);
+                    var hostPacket = new SendSpawnPlayerPacket(hostCharacter, lobbyContext.GetMyself().UUID, MyPlayer.Instance.transform.position, MyPlayer.Instance.transform.rotation);
+                    player.Connection.EnqueuePacket(hostPacket);
                 });
             };
         }

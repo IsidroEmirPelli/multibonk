@@ -1,6 +1,7 @@
-﻿using MelonLoader;
+﻿extern alias DI2;
+using MelonLoader;
 using Multibonk.UserInterface.Window;
-using Microsoft.Extensions.DependencyInjection;
+using DI2::Microsoft.Extensions.DependencyInjection;
 using Multibonk.Networking.Lobby;
 using Multibonk.Networking.Comms.Server.Protocols;
 using Multibonk.Networking.Comms.Client.Protocols;
@@ -20,6 +21,7 @@ namespace Multibonk
         UIManager manager;
         EventHandlerExecutor executor;
 
+
         public override void OnGUI()
         {
             if(manager != null)
@@ -29,27 +31,31 @@ namespace Multibonk
 
         public override void OnUpdate()
         {
-            executor.Update();
+            if (executor != null)
+                executor.Update();
         }
 
         public override void OnFixedUpdate()
         {
-            executor.FixedUpdate();
+            if (executor != null)
+                executor.FixedUpdate();
         }
 
         public override void OnLateUpdate()
         {
-            executor.LateUpdate();
+            if (executor != null)
+                executor.LateUpdate();
         }
 
 
         public override void OnInitializeMelon()
         {
-            var services = new ServiceCollection();
+            var services = new DI2::Microsoft.Extensions.DependencyInjection.ServiceCollection();
 
             services.AddSingleton<IGameEventHandler, CharacterChangedEventHandler>();
             services.AddSingleton<IGameEventHandler, GameLoadedEventHandler>();
             services.AddSingleton<IGameEventHandler, PlayerMovementEventHandler>();
+            services.AddSingleton<IGameEventHandler, PlayerLevelXPEventHandler>();
             services.AddSingleton<IGameEventHandler, StartGameEventHandler>();
             services.AddSingleton<IGameEventHandler, UpdateNetworkPlayerAnimationsEventHandler>();
             services.AddSingleton<IGameEventHandler, GameDispatcher>();
@@ -60,6 +66,8 @@ namespace Multibonk
             services.AddSingleton<IServerPacketHandler, SelectCharacterPacketHandler>();
             services.AddSingleton<IServerPacketHandler, PlayerMovePacketHandler>();
             services.AddSingleton<IServerPacketHandler, PlayerRotatePacketHandler>();
+            services.AddSingleton<IServerPacketHandler, PlayerLevelPacketHandler>();
+            services.AddSingleton<IServerPacketHandler, PlayerXPPacketHandler>();
             services.AddSingleton<IServerPacketHandler, GameLoadedPacketHandler>();
 
             services.AddSingleton<IClientPacketHandler, LobbyPlayerListPacketHandler>();
@@ -68,6 +76,8 @@ namespace Multibonk
             services.AddSingleton<IClientPacketHandler, StartGamePacketHandler>();
             services.AddSingleton<IClientPacketHandler, PlayerMovedPacketHandler>();
             services.AddSingleton<IClientPacketHandler, PlayerRotatedPacketHandler>();
+            services.AddSingleton<IClientPacketHandler, PlayerLevelUpdatedPacketHandler>();
+            services.AddSingleton<IClientPacketHandler, PlayerXPUpdatedPacketHandler>();
 
             services.AddSingleton<ClientProtocol>();
             services.AddSingleton<ServerProtocol>();
@@ -86,10 +96,10 @@ namespace Multibonk
 
             var serviceProvider = services.BuildServiceProvider();
 
-            manager = serviceProvider.GetService<UIManager>();
-            executor = serviceProvider.GetService<EventHandlerExecutor>();
+            manager = DI2::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetService<UIManager>(serviceProvider);
+            executor = DI2::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetService<EventHandlerExecutor>(serviceProvider);
 
-            var _lobbyContext = serviceProvider.GetService<LobbyContext>();
+            var _lobbyContext = DI2::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetService<LobbyContext>(serviceProvider);
 
             base.OnInitializeMelon();
         }

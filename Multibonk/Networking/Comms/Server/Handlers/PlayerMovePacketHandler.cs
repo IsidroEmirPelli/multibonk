@@ -7,6 +7,7 @@ using Il2CppRewired.Utils;
 using Multibonk.Networking.Comms.Base.Packet;
 using Multibonk.Game.Handlers;
 using Multibonk.Game;
+using MelonLoader;
 
 namespace Multibonk.Networking.Comms.Server.Handlers
 {
@@ -38,6 +39,7 @@ namespace Multibonk.Networking.Comms.Server.Handlers
                 }
             });
 
+            MelonLogger.Msg($"[SERVER] Reenviando posición recibida del cliente (UUID: {playerId}): ({packet.Position.x:F2}, {packet.Position.y:F2}, {packet.Position.z:F2})");
             foreach (var player in _lobbyContext.GetPlayers())
             {
                 if (player.Connection == null || player.UUID == playerId)

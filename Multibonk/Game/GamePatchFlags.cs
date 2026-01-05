@@ -19,5 +19,7 @@ namespace Multibonk.Game
 
         public static Vector3 LastPlayerPosition { get; set; }
         public static Quaternion LastPlayerRotation { get; set; }
+        public static int LastPlayerLevel { get; set; } = 1;
+        public static int LastPlayerXP { get; set; } = 0;
     }
 }

@@ -30,7 +30,8 @@ namespace Multibonk.Game
         public static event Action SpawnDropEvent;
         public static event Action OpenChestEvent;
 
-        public static event Action PlayerLevelUpEvent;
+        public static event Action<int> PlayerLevelUpEvent;
+        public static event Action<int> PlayerXPChangedEvent;
 
 
         public static void TriggerConfirmMap()
@@ -60,6 +61,16 @@ namespace Multibonk.Game
         public static void TriggerPlayerRotated(Quaternion newRotation)
         {
             PlayerRotateEvent?.Invoke(newRotation);
+        }
+
+        public static void TriggerPlayerLevelUp(int level)
+        {
+            PlayerLevelUpEvent?.Invoke(level);
+        }
+
+        public static void TriggerPlayerXPChanged(int xp)
+        {
+            PlayerXPChangedEvent?.Invoke(xp);
         }
     }
 }
