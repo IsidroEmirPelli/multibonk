@@ -12,6 +12,7 @@ namespace Multibonk.Game
 
         public static event Action<Vector3> PlayerMoveEvent;
         public static event Action<Quaternion> PlayerRotateEvent;
+        public static event Action<Vector3, Quaternion> PlayerAttackEvent;
 
         public static event Action PlayerDieEvent;
         public static event Action PlayerTakeHitEvent;
@@ -61,6 +62,11 @@ namespace Multibonk.Game
         public static void TriggerPlayerRotated(Quaternion newRotation)
         {
             PlayerRotateEvent?.Invoke(newRotation);
+        }
+
+        public static void TriggerPlayerAttack(Vector3 position, Quaternion rotation)
+        {
+            PlayerAttackEvent?.Invoke(position, rotation);
         }
 
         public static void TriggerPlayerLevelUp(int level)

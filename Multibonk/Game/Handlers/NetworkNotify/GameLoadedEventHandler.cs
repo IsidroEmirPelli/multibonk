@@ -20,9 +20,11 @@ namespace Multibonk.Game.Handlers.NetworkNotify
                 if (!LobbyPatchFlags.IsHosting)
                     return;
 
-                // Spawn all clients for the host
+                var hostUUID = lobbyContext.GetMyself().UUID;
+
+                // Spawn all clients for the host (excluding the host itself)
                 lobbyContext.GetPlayers()
-                .Where(player => player.Connection != null)
+                .Where(player => player.Connection != null && player.UUID != hostUUID)
                 .ToList()
                 .ForEach(player =>
                 {
@@ -30,9 +32,9 @@ namespace Multibonk.Game.Handlers.NetworkNotify
                     var data = GamePatchFlags.CharacterData.Find(d => d.eCharacter == character);
                     GameFunctions.SpawnNetworkPlayer(player.UUID, character, MyPlayer.Instance.transform.position, MyPlayer.Instance.transform.rotation);
 
-                    // Send information about other players (including the host) to this client
+                    // Send information about other players (excluding the host and the current player) to this client
                     lobbyContext.GetPlayers()
-                        .Where(target => target != player)
+                        .Where(target => target != player && target.UUID != hostUUID)
                         .ToList()
                         .ForEach(target =>
                         {
@@ -41,9 +43,9 @@ namespace Multibonk.Game.Handlers.NetworkNotify
                             player.Connection.EnqueuePacket(packet);
                         });
 
-                    // Also send the host's own character to this client
+                    // Send the host's own character to this client (so they can see the host)
                     var hostCharacter = Enum.Parse<ECharacter>(lobbyContext.GetMyself().SelectedCharacter);
-                    var hostPacket = new SendSpawnPlayerPacket(hostCharacter, lobbyContext.GetMyself().UUID, MyPlayer.Instance.transform.position, MyPlayer.Instance.transform.rotation);
+                    var hostPacket = new SendSpawnPlayerPacket(hostCharacter, hostUUID, MyPlayer.Instance.transform.position, MyPlayer.Instance.transform.rotation);
                     player.Connection.EnqueuePacket(hostPacket);
                 });
             };

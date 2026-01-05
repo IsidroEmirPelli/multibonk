@@ -30,22 +30,81 @@ public static class Utils
     {
         Event e = Event.current;
 
-
         if (e.type == EventType.MouseDown)
         {
             isFocused = rect.Contains(e.mousePosition);
-
         }
-
 
         if (isFocused && e.type == EventType.KeyDown)
         {
-            if (e.keyCode == KeyCode.Backspace && text.Length > 0)
-                text = text.Substring(0, text.Length - 1);
-            else if (e.character != '\0' && !char.IsControl(e.character))
-                text += e.character;
+            // Manejar Ctrl+V o Cmd+V (Pegar)
+            if ((e.control || e.command) && e.keyCode == KeyCode.V)
+            {
+                string clipboard = GUIUtility.systemCopyBuffer;
+                if (!string.IsNullOrEmpty(clipboard))
+                {
+                    text += clipboard;
+                }
+                e.Use();
+                return;
+            }
 
-            e.Use();
+            // Manejar Ctrl+C o Cmd+C (Copiar)
+            if ((e.control || e.command) && e.keyCode == KeyCode.C)
+            {
+                if (!string.IsNullOrEmpty(text))
+                {
+                    GUIUtility.systemCopyBuffer = text;
+                }
+                e.Use();
+                return;
+            }
+
+            // Manejar Ctrl+X o Cmd+X (Cortar)
+            if ((e.control || e.command) && e.keyCode == KeyCode.X)
+            {
+                if (!string.IsNullOrEmpty(text))
+                {
+                    GUIUtility.systemCopyBuffer = text;
+                    text = "";
+                }
+                e.Use();
+                return;
+            }
+
+            // Manejar Ctrl+A o Cmd+A (Seleccionar todo - copia el texto)
+            if ((e.control || e.command) && e.keyCode == KeyCode.A)
+            {
+                if (!string.IsNullOrEmpty(text))
+                {
+                    GUIUtility.systemCopyBuffer = text;
+                }
+                e.Use();
+                return;
+            }
+
+            // Manejar Backspace
+            if (e.keyCode == KeyCode.Backspace && text.Length > 0)
+            {
+                text = text.Substring(0, text.Length - 1);
+                e.Use();
+                return;
+            }
+
+            // Manejar Delete
+            if (e.keyCode == KeyCode.Delete && text.Length > 0)
+            {
+                text = text.Substring(0, text.Length - 1);
+                e.Use();
+                return;
+            }
+
+            // Manejar caracteres normales
+            if (e.character != '\0' && !char.IsControl(e.character))
+            {
+                text += e.character;
+                e.Use();
+            }
         }
     }
 

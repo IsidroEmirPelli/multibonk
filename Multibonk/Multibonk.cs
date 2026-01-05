@@ -58,6 +58,7 @@ namespace Multibonk
             services.AddSingleton<IGameEventHandler, PlayerLevelXPEventHandler>();
             services.AddSingleton<IGameEventHandler, StartGameEventHandler>();
             services.AddSingleton<IGameEventHandler, UpdateNetworkPlayerAnimationsEventHandler>();
+            services.AddSingleton<IGameEventHandler, PlayerAttackEventHandler>();
             services.AddSingleton<IGameEventHandler, GameDispatcher>();
 
             services.AddSingleton<EventHandlerExecutor>();
@@ -68,6 +69,7 @@ namespace Multibonk
             services.AddSingleton<IServerPacketHandler, PlayerRotatePacketHandler>();
             services.AddSingleton<IServerPacketHandler, PlayerLevelPacketHandler>();
             services.AddSingleton<IServerPacketHandler, PlayerXPPacketHandler>();
+            services.AddSingleton<IServerPacketHandler, PlayerAttackPacketHandler>();
             services.AddSingleton<IServerPacketHandler, GameLoadedPacketHandler>();
 
             services.AddSingleton<IClientPacketHandler, LobbyPlayerListPacketHandler>();
@@ -78,6 +80,7 @@ namespace Multibonk
             services.AddSingleton<IClientPacketHandler, PlayerRotatedPacketHandler>();
             services.AddSingleton<IClientPacketHandler, PlayerLevelUpdatedPacketHandler>();
             services.AddSingleton<IClientPacketHandler, PlayerXPUpdatedPacketHandler>();
+            services.AddSingleton<IClientPacketHandler, PlayerAttackedPacketHandler>();
 
             services.AddSingleton<ClientProtocol>();
             services.AddSingleton<ServerProtocol>();

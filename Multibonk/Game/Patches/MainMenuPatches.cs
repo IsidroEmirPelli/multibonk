@@ -444,10 +444,19 @@ namespace Multibonk.Game.Patches
                 const float positionThreshold = 0.05f;
                 const float rotationThreshold = 10f;
 
-                if ((myPlayer.transform.position - GamePatchFlags.LastPlayerPosition).sqrMagnitude > positionThreshold * positionThreshold)
+                bool isMoving = (myPlayer.transform.position - GamePatchFlags.LastPlayerPosition).sqrMagnitude > positionThreshold * positionThreshold;
+                
+                if (isMoving)
                 {
                     GamePatchFlags.LastPlayerPosition = myPlayer.transform.position;
                     GameEvents.TriggerPlayerMoved(myPlayer.transform.position);
+                    
+                    // Asegurar que la animación de caminar esté activa para el jugador local
+                    if (myPlayer.playerRenderer != null && !myPlayer.playerRenderer.moving)
+                    {
+                        myPlayer.playerRenderer.moving = true;
+                        myPlayer.playerRenderer.ForceMoving(true);
+                    }
                 }
 
                 var rotation = myPlayer.playerRenderer.transform.rotation;
@@ -457,6 +466,10 @@ namespace Multibonk.Game.Patches
                     GamePatchFlags.LastPlayerRotation = rotation;
                     GameEvents.TriggerPlayerRotated(rotation);
                 }
+
+                // Intentar detectar ataques monitoreando el inventario
+                // Por ahora deshabilitado hasta encontrar el método correcto
+                // CheckForAttack(myPlayer);
 
                 // Track level and XP changes using PlayerStats
                 try
@@ -640,6 +653,76 @@ namespace Multibonk.Game.Patches
                     MelonLogger.Msg($"Error en OnLevelUp patch: {e.Message}");
                 }
             }
+        }
+
+        // Patch de depuración para encontrar métodos de ataque
+        // Este patch se ejecuta una vez al inicio para listar métodos disponibles
+        private static bool _hasLoggedMethods = false;
+        
+        [HarmonyPatch(typeof(MyPlayer), "Start")]
+        class DebugAttackMethodsPatch
+        {
+            static void Postfix(MyPlayer __instance)
+            {
+                if (_hasLoggedMethods || __instance == null)
+                    return;
+                    
+                try
+                {
+                    _hasLoggedMethods = true;
+                    MelonLogger.Msg("=== Buscando métodos de ataque en MyPlayer ===");
+                    
+                    var myPlayerType = typeof(MyPlayer);
+                    var methods = myPlayerType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                    
+                    var attackKeywords = new[] { "shoot", "fire", "attack", "weapon", "projectile", "cast", "ability" };
+                    foreach (var method in methods)
+                    {
+                        var methodName = method.Name.ToLower();
+                        if (attackKeywords.Any(keyword => methodName.Contains(keyword)))
+                        {
+                            MelonLogger.Msg($"Método potencial de ataque encontrado: {method.Name} (parámetros: {string.Join(", ", method.GetParameters().Select(p => p.ParameterType.Name))})");
+                        }
+                    }
+                    
+                    // También buscar en el inventario
+                    if (__instance.inventory != null)
+                    {
+                        MelonLogger.Msg("=== Buscando métodos de ataque en Inventory ===");
+                        var invType = __instance.inventory.GetType();
+                        var invMethods = invType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                        
+                        foreach (var method in invMethods)
+                        {
+                            var methodName = method.Name.ToLower();
+                            if (attackKeywords.Any(keyword => methodName.Contains(keyword)))
+                            {
+                                MelonLogger.Msg($"Método potencial de ataque en Inventory: {method.Name} (parámetros: {string.Join(", ", method.GetParameters().Select(p => p.ParameterType.Name))})");
+                            }
+                        }
+                    }
+                    
+                    MelonLogger.Msg("=== Fin de búsqueda de métodos de ataque ===");
+                }
+                catch (Exception e)
+                {
+                    MelonLogger.Msg($"Error en depuración de métodos: {e.Message}");
+                }
+            }
+        }
+
+        // TODO: Implementar detección de ataques
+        // Por ahora, la detección de ataques está deshabilitada porque no conocemos
+        // el método exacto que se llama cuando el jugador ataca.
+        // Opciones:
+        // 1. Buscar el método correcto usando reflexión en tiempo de ejecución
+        // 2. Monitorear cambios en el inventario o proyectiles
+        // 3. Usar un patch genérico que intercepte todas las llamadas a métodos relacionados con armas
+        private static void CheckForAttack(MyPlayer myPlayer)
+        {
+            // Por ahora, este método está vacío hasta que encontremos el método correcto
+            // para detectar ataques. La infraestructura de red ya está lista,
+            // solo necesitamos encontrar cómo detectar cuando el jugador ataca.
         }
 
 
